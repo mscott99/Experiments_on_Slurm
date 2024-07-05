@@ -25,22 +25,16 @@ def load_module(module_path):
 
 def cleanup(original_df, output_dir):
     pickle_glob = os.path.join(output_dir, "exp_*/processed_*.pkl")
-
-    # Collect all experiment dataframes
     experiment_dfs = []
     for file in glob.glob(pickle_glob):
         file_obj = pd.read_pickle(file)
-        if(file_obj is None):
+        if (file_obj is None):
             raise Exception("Reading file yields None: " + file)
         experiment_dfs.append(file_obj)
 
-    # Concatenate all experiment dataframes
     all_experiments_df = pd.concat(experiment_dfs, ignore_index=False)
-
-    # Merge with the original dataframe
     all_experiments_df.attrs = original_df.attrs
-
-    # Save the result
+    # Save the result: this print statement gives a human readable output.
     print(all_experiments_df)
     all_experiments_df.to_pickle(os.path.join(
         output_dir, "combined_results.pickle"))
@@ -53,8 +47,10 @@ def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_file
     experiment = getattr(module, 'experiment')
     # Ensure the output subfolder exists
     if (get_num_workers):
-        if(rows_per_worker == None):
-            raise Exception("rows_per_worker is required to get the number of rows.")
+        if (rows_per_worker == None):
+            raise Exception(
+                "rows_per_worker is required to get the number of rows.")
+        # The print statement below is the returned value
         print(-(-make_df().shape[0]//rows_per_worker))
         return
 
@@ -62,31 +58,26 @@ def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_file
     if (do_cleanup):
         cleanup(df, output_dir)
         return
-    if(output_dir == None):
+    if (output_dir == None):
         raise Exception("Output directory is required.")
-    if(exp_id == None):
+    if (exp_id == None):
         raise Exception("exp_id is required.")
-    if(rows_per_worker == None):
+    if (rows_per_worker == None):
         raise Exception("rows_per_worker is required.")
     output_subfolder = os.path.join(output_dir, "exp_" + str(exp_id))
     os.makedirs(output_subfolder, exist_ok=True)
-    # Load the DataFrame
     total_rows = len(df)
-
-    # Calculate the start and end indices for this task
     start_idx = (exp_id-1) * rows_per_worker
     end_idx = min(exp_id * rows_per_worker, total_rows)
-
-    # Process the chunk
     chunk_df = df.iloc[start_idx:end_idx].copy()
     output = chunk_df.apply(lambda row: experiment(
         {**row.to_dict(), **chunk_df.attrs}), 1, result_type='expand')
     processed_df = pd.concat([chunk_df, output], axis=1)
     print(processed_df)
-    # Save the processed chunk
     output_file = os.path.join(output_subfolder, f"processed_{exp_id}.pkl")
     processed_df.to_pickle(output_file)
     print(f"Processed rows {start_idx} to {end_idx} saved to {output_file}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -103,8 +94,6 @@ if __name__ == "__main__":
                         help="ID of the experiment.")
     parser.add_argument("-p", "--project-dir", required=False,
                         help="Path to project dir with possible dependent scripts to import with python.")
-    # parser.add_argument(
-    # "-f", "--df_file", help="Path to the pickle file containing the setup DataFrame")
     parser.add_argument("-o", "--output-dir", required=False,
                         help="Output directory")
     args = parser.parse_args()
