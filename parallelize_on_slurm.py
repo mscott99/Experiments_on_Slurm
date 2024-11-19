@@ -31,7 +31,6 @@ def cleanup(original_df, output_dir):
         if (file_obj is None):
             raise Exception("Reading file yields None: " + file)
         experiment_dfs.append(file_obj)
-
     all_experiments_df = pd.concat(experiment_dfs, ignore_index=False)
     all_experiments_df.attrs = original_df.attrs
     # Save the result: this print statement gives a human readable output.
