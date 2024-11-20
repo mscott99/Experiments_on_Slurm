@@ -6,11 +6,11 @@ EMAIL="matthewscott@math.ubc.ca"  # Email to send notification to
 VENV_ACTIVATE_PATH="/home/mscott99/projects/def-oyilmaz/mscott99/Sparse_adapted_denoising/venv/bin/activate"
 PROJECT_DIR="/home/mscott99/projects/def-oyilmaz/mscott99/Sparse_adapted_denoising"
 ACCOUNT="def-oyilmaz"
-JOB_NAME="noise_mag_test"
-TIME="00:05:00"     # Max export SBATCH_ACCOUNTexpected time for each job
-MEMORY="8G"       # Max expected memory for each job
-CPU_NUM="1"
-ROWS_PER_WORKER=1
+JOB_NAME="unif_recov"
+TIME="01:00:00"     # Max export SBATCH_ACCOUNTexpected time for each job
+MEMORY="4G"       # Max expected memory for each job
+CPU_NUM="4"
+ROWS_PER_WORKER=2
 
 # ARGUMENTS
 # The first argument is the path of the python sweep file to run
