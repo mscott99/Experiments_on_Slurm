@@ -6,11 +6,11 @@ EMAIL="matthewscott@math.ubc.ca"  # Email to send notification to
 VENV_ACTIVATE_PATH="/home/mscott99/projects/def-oyilmaz/mscott99/Sparse_adapted_denoising/venv/bin/activate"
 PROJECT_DIR="/home/mscott99/projects/def-oyilmaz/mscott99/Sparse_adapted_denoising"
 ACCOUNT="def-oyilmaz"
-JOB_NAME="unif_recov"
-TIME="01:00:00"     # Max export SBATCH_ACCOUNTexpected time for each job
-MEMORY="4G"       # Max expected memory for each job
+JOB_NAME="noisy_unif_run"
+TIME="01:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
+MEMORY="8G"       # Max expected memory for each job
 CPU_NUM="4"
-ROWS_PER_WORKER=2
+ROWS_PER_WORKER=20
 
 # ARGUMENTS
 # The first argument is the path of the python sweep file to run
@@ -43,9 +43,9 @@ create_unique_dir() {
     echo "$dir_path"
 }
 OUT_DIR=$(create_unique_dir "$BASE_OUT_DIR")
-mkdir -p $OUT_DIR
+mkdir -p "$OUT_DIR"
 END_IND=$(python "$SWEEP_FILE" --get-num-workers -f "$EXP_FILE" --rows-per-worker "$ROWS_PER_WORKER")
-echo "$END_IND" > $OUT_DIR/num_workers
+echo "$END_IND" > "$OUT_DIR"/num_workers
 
 # Make log output directory
 
@@ -53,7 +53,7 @@ echo "$END_IND" > $OUT_DIR/num_workers
 job_id=$(sbatch << HEREDOC
 #!/bin/bash
 #SBATCH --mail-user="$EMAIL"
-#SBATCH --mail-type=ALL
+#SBATCH --mail-type=END
 #SBATCH --time="$TIME"
 #SBATCH --array=1-"$END_IND"
 #SBATCH --cpus-per-task="$CPU_NUM"
@@ -83,6 +83,6 @@ while sacct -j "$job_id" -n -o state | grep -qE 'PENDING|RUNNING'; do
     sleep 10
 done
 sleep 30 # Wait for filesystem sync
-python $SWEEP_FILE --cleanup -f "$EXP_FILE" -o $OUT_DIR > $OUT_DIR/cleanup_stdout
+python "$SWEEP_FILE" --cleanup -f "$EXP_FILE" -o "$OUT_DIR" > "$OUT_DIR"/cleanup_stdout
 echo "Job $job_id completed at $(date)" > "$OUT_DIR/completed"
 ) & disown
