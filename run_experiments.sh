@@ -26,7 +26,23 @@ module load StdEnv
 module load python
 module load scipy-stack
 source "$VENV_ACTIVATE_PATH"
-OUT_DIR="/home/$USER/scratch/sweep_out/sweep_$JOB_NAME"
+BASE_OUT_DIR="/home/$USER/scratch/sweep_out/sweep_$JOB_NAME"
+create_unique_dir() {
+    local base_path="$1"
+    local dir_path="$base_path"
+    local counter=1
+    
+    # If directory exists, append increasing numbers until we find a free name
+    while [[ -d "$dir_path" ]]; do
+        dir_path="${base_path}_${counter}"
+        ((counter++))
+    done
+    
+    # Create the directory
+    mkdir -p "$dir_path"
+    echo "$dir_path"
+}
+OUT_DIR=$(create_unique_dir "$BASE_OUT_DIR")
 mkdir -p $OUT_DIR
 END_IND=$(python "$SWEEP_FILE" --get-num-workers -f "$EXP_FILE" --rows-per-worker "$ROWS_PER_WORKER")
 echo "$END_IND" > $OUT_DIR/num_workers
@@ -64,8 +80,9 @@ echo "Submitted job with ID ${job_id}"
 (
 sleep 30 # Give enough time for the system to register the job before checking
 while sacct -j "$job_id" -n -o state | grep -qE 'PENDING|RUNNING'; do
-    sleep 5
+    sleep 10
 done
-
+sleep 30 # Wait for filesystem sync
 python $SWEEP_FILE --cleanup -f "$EXP_FILE" -o $OUT_DIR > $OUT_DIR/cleanup_stdout
+echo "Job $job_id completed at $(date)" > "$OUT_DIR/completed"
 ) & disown
