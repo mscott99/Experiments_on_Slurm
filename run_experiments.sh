@@ -3,10 +3,10 @@
 
 USER="mscott99"
 EMAIL="matthewscott@math.ubc.ca"  # Email to send notification to
-VENV_ACTIVATE_PATH="/home/mscott99/projects/def-oyilmaz/mscott99/Model-adapted-Fourier-sampling-for-generative-compressed-sensing/cc_venv/bin/activate"
-PROJECT_DIR="/home/mscott99/projects/def-oyilmaz/mscott99/Model-adapted-Fourier-sampling-for-generative-compressed-sensing"
+VENV_ACTIVATE_PATH="/home/mscott99/projects/def-oyilmaz/mscott99/Sparse_adapted_denoising/venv/bin/activate"
+PROJECT_DIR="/home/mscott99/projects/def-oyilmaz/mscott99/Sparse_adapted_denoising"
 ACCOUNT="def-oyilmaz"
-JOB_NAME="test4"
+JOB_NAME="testerthing"
 TIME="00:05:00"     # Max export SBATCH_ACCOUNTexpected time for each job
 MEMORY="8G"       # Max expected memory for each job
 CPU_NUM="1"
@@ -33,6 +33,7 @@ echo "$END_IND" > $OUT_DIR/num_workers
 
 # Make log output directory
 
+# let PYTHONPATH="$PYTHONPATH":"$PROJECT_DIR"
 job_id=$(sbatch << HEREDOC
 #!/bin/bash
 #SBATCH --mail-user="$EMAIL"
