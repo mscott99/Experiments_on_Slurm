@@ -5,6 +5,7 @@ from re import error
 import pandas as pd
 import sys
 import importlib.util
+import time
 from pathlib import Path
 
 
@@ -22,12 +23,19 @@ def load_module(module_path):
     spec.loader.exec_module(module)
     return module
 
-
-def cleanup(original_df, output_dir):
+def cleanup(original_df, output_dir, max_retries=3, retry_delay=5):
     pickle_glob = os.path.join(output_dir, "exp_*/processed_*.pkl")
     experiment_dfs = []
+    file_obj = None
     for file in glob.glob(pickle_glob):
-        file_obj = pd.read_pickle(file)
+        for attempt in range(max_retries):
+            try:
+                file_obj = pd.read_pickle(file)
+            except (EOFError, BrokenPipeError) as e:
+                if attempt == max_retries - 1:
+                    raise
+                print(f"Attempt {attempt + 1} failed: {str(e)}. Retrying in {retry_delay} seconds...")
+                time.sleep(retry_delay)
         if (file_obj is None):
             raise Exception("Reading file yields None: " + file)
         experiment_dfs.append(file_obj)
