@@ -1,4 +1,5 @@
 import argparse
+from typing import Callable, Any, Union
 import glob
 import os
 from re import error
@@ -8,6 +9,7 @@ import importlib.util
 import time
 from pathlib import Path
 
+SEED=1234
 
 def load_module(module_path):
     module_name = Path(module_path).stem
@@ -39,7 +41,7 @@ def cleanup(original_df, output_dir, max_retries=3, retry_delay=5):
         if (file_obj is None):
             raise Exception("Reading file yields None: " + file)
         experiment_dfs.append(file_obj)
-    all_experiments_df = pd.concat(experiment_dfs, ignore_index=False)
+    all_experiments_df = pd.concat(experiment_dfs, ignore_index=False).sort_index()
     all_experiments_df.attrs = original_df.attrs
     # Save the result: this print statement gives a human readable output.
     print(all_experiments_df)
@@ -47,11 +49,11 @@ def cleanup(original_df, output_dir, max_retries=3, retry_delay=5):
         output_dir, "combined_results.pickle"))
 
 
-def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_file: str, output_dir: str, exp_id: int, project_dir: str):
+def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_file: str, output_dir: str, exp_id: int, project_dir: str, seed=SEED):
     sys.path.append(project_dir)
     module = load_module(exp_file)
-    make_df = getattr(module, 'make_df')
-    experiment = getattr(module, 'experiment')
+    make_df:Callable[[], pd.DataFrame] = getattr(module, 'make_df')
+    experiment:Callable[[Union[dict, pd.Series]], dict[str, Any]] = getattr(module, 'experiment')
     # Ensure the output subfolder exists
     if (get_num_workers):
         if (rows_per_worker == None):
@@ -60,8 +62,8 @@ def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_file
         # The print statement below is the returned value
         print(-(-make_df().shape[0]//rows_per_worker))
         return
-
-    df = make_df()
+    
+    df = make_df().sample(frac=1, random_state=seed)
     if (do_cleanup):
         cleanup(df, output_dir)
         return
@@ -76,7 +78,7 @@ def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_file
     total_rows = len(df)
     start_idx = (exp_id-1) * rows_per_worker
     end_idx = min(exp_id * rows_per_worker, total_rows)
-    chunk_df = df.iloc[start_idx:end_idx].copy()
+    chunk_df = df.iloc[start_idx:end_idx].copy() # indexes by position, even with shuffled indices.
     output = chunk_df.apply(lambda row: experiment(
         {**row.to_dict(), **chunk_df.attrs}), 1, result_type='expand')
     processed_df = pd.concat([chunk_df, output], axis=1)
