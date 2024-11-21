@@ -6,10 +6,10 @@ EMAIL="matthewscott@math.ubc.ca"  # Email to send notification to
 VENV_ACTIVATE_PATH="/home/mscott99/projects/def-oyilmaz/mscott99/Sparse_adapted_denoising/venv/bin/activate"
 PROJECT_DIR="/home/mscott99/projects/def-oyilmaz/mscott99/Sparse_adapted_denoising"
 ACCOUNT="def-oyilmaz"
-JOB_NAME="noisy_unif_run"
+JOB_NAME="noisy_unif_run_fixed"
 TIME="01:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
 MEMORY="8G"       # Max expected memory for each job
-CPU_NUM="4"
+CPU_NUM="1"
 ROWS_PER_WORKER=20
 
 # ARGUMENTS
