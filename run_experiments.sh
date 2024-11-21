@@ -7,10 +7,10 @@ VENV_ACTIVATE_PATH="/home/mscott99/projects/def-oyilmaz/mscott99/Sparse_adapted_
 PROJECT_DIR="/home/mscott99/projects/def-oyilmaz/mscott99/Sparse_adapted_denoising"
 ACCOUNT="def-oyilmaz"
 JOB_NAME="noisy_unif_run_fixed"
-TIME="01:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
-MEMORY="8G"       # Max expected memory for each job
-CPU_NUM="1"
-ROWS_PER_WORKER=20
+TIME="02:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
+MEMORY="16G"       # Max expected memory for each job
+CPU_NUM="4"
+ROWS_PER_WORKER=10
 
 # ARGUMENTS
 # The first argument is the path of the python sweep file to run
