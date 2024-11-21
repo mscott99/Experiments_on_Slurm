@@ -25,7 +25,7 @@ def load_module(module_path):
     spec.loader.exec_module(module)
     return module
 
-def cleanup(original_df, output_dir, max_retries=3, retry_delay=5):
+def cleanup(original_df:pd.DataFrame, output_dir, max_retries=3, retry_delay=5):
     pickle_glob = os.path.join(output_dir, "exp_*/processed_*.pkl")
     experiment_dfs = []
     file_obj = None
@@ -39,12 +39,15 @@ def cleanup(original_df, output_dir, max_retries=3, retry_delay=5):
                 print(f"Attempt {attempt + 1} failed: {str(e)}. Retrying in {retry_delay} seconds...")
                 time.sleep(retry_delay)
         if (file_obj is None):
-            raise Exception("Reading file yields None: " + file)
+            sys.stderr.write("Reading file yields None: " + file)
         experiment_dfs.append(file_obj)
     all_experiments_df = pd.concat(experiment_dfs, ignore_index=False).sort_index()
     all_experiments_df.attrs = original_df.attrs
-    # Save the result: this print statement gives a human readable output.
-    print(all_experiments_df)
+    if len(all_experiments_df) != len(original_df):
+        sys.stderr.write("Could not find all experiment results. See the missing rows in MISSING_ROWS.pickle")
+        missing_idx = original_df.index.difference(all_experiments_df.index)
+        original_df.loc[missing_idx].to_pickle(os.path.join(
+        output_dir, "MISSING_ROWS.pickle"))
     all_experiments_df.to_pickle(os.path.join(
         output_dir, "combined_results.pickle"))
 
@@ -54,31 +57,19 @@ def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_file
     module = load_module(exp_file)
     make_df:Callable[[], pd.DataFrame] = getattr(module, 'make_df')
     experiment:Callable[[Union[dict, pd.Series]], dict[str, Any]] = getattr(module, 'experiment')
-    # Ensure the output subfolder exists
     if (get_num_workers):
-        if (rows_per_worker == None):
-            raise Exception(
-                "rows_per_worker is required to get the number of rows.")
-        # The print statement below is the returned value
-        print(-(-make_df().shape[0]//rows_per_worker))
+        print(-(-len(make_df())//rows_per_worker)) # negative signs for good rounding
         return
-    
     df = make_df().sample(frac=1, random_state=seed)
     if (do_cleanup):
         cleanup(df, output_dir)
         return
-    if (output_dir == None):
-        raise Exception("Output directory is required.")
-    if (exp_id == None):
-        raise Exception("exp_id is required.")
-    if (rows_per_worker == None):
-        raise Exception("rows_per_worker is required.")
     output_subfolder = os.path.join(output_dir, "exp_" + str(exp_id))
     os.makedirs(output_subfolder, exist_ok=True)
     total_rows = len(df)
     start_idx = (exp_id-1) * rows_per_worker
     end_idx = min(exp_id * rows_per_worker, total_rows)
-    chunk_df = df.iloc[start_idx:end_idx].copy() # indexes by position, even with shuffled indices.
+    chunk_df = df.iloc[start_idx:end_idx].copy()
     output = chunk_df.apply(lambda row: experiment(
         {**row.to_dict(), **chunk_df.attrs}), 1, result_type='expand')
     processed_df = pd.concat([chunk_df, output], axis=1)

@@ -6,11 +6,11 @@ EMAIL="matthewscott@math.ubc.ca"  # Email to send notification to
 VENV_ACTIVATE_PATH="/home/mscott99/projects/def-oyilmaz/mscott99/Sparse_adapted_denoising/venv/bin/activate"
 PROJECT_DIR="/home/mscott99/projects/def-oyilmaz/mscott99/Sparse_adapted_denoising"
 ACCOUNT="def-oyilmaz"
-JOB_NAME="noisy_unif_run_fixed"
+JOB_NAME="fixed"
 TIME="02:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
-MEMORY="8G"       # Max expected memory for each job
+MEMORY="8G"      # Max expected memory for each job
 CPU_NUM="1"
-ROWS_PER_WORKER=12
+ROWS_PER_WORKER=6
 
 # ARGUMENTS
 # The first argument is the path of the python sweep file to run
@@ -83,6 +83,6 @@ while sacct -j "$job_id" -n -o state | grep -qE 'PENDING|RUNNING'; do
     sleep 10
 done
 sleep 30 # Wait for filesystem sync
-python "$SWEEP_FILE" --cleanup -f "$EXP_FILE" -o "$OUT_DIR" > "$OUT_DIR"/cleanup_stdout
-echo "Job $job_id completed at $(date)" > "$OUT_DIR/completed"
+python "$SWEEP_FILE" --cleanup -f "$EXP_FILE" -o "$OUT_DIR" > "$OUT_DIR"/cleanup_stdout.log 2> "$OUT_DIR"/cleanup_ERR.log
+echo "Job $job_id completed at $(date)" > "$OUT_DIR/completed.log"
 ) & disown
