@@ -78,6 +78,7 @@ HEREDOC
 
 job_id=${job_id##* }
 echo "Submitted job with ID ${job_id}"
+echo "$job_id" > $OUT_DIR/JOB_ID
 (
 sleep 30 # Give enough time for the system to register the job before checking
 while sacct -j "$job_id" -n -o state | grep -qE 'PENDING|RUNNING'; do
