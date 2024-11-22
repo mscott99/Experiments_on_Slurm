@@ -6,8 +6,8 @@ EMAIL="matthewscott@math.ubc.ca"  # Email to send notification to
 VENV_ACTIVATE_PATH="/home/mscott99/projects/def-oyilmaz/mscott99/Sparse_adapted_denoising/venv/bin/activate"
 PROJECT_DIR="/home/mscott99/projects/def-oyilmaz/mscott99/Sparse_adapted_denoising"
 ACCOUNT="def-oyilmaz"
-JOB_NAME="fixed"
-TIME="02:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
+JOB_NAME="test"
+TIME="01:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
 MEMORY="8G"      # Max expected memory for each job
 CPU_NUM="1"
 ROWS_PER_WORKER=6
@@ -26,7 +26,8 @@ module load StdEnv
 module load python
 module load scipy-stack
 source "$VENV_ACTIVATE_PATH"
-BASE_OUT_DIR="/home/$USER/scratch/sweep_out/sweep_$JOB_NAME"
+
+BASE_OUT_DIR="/home/$USER/scratch/sweep_out/$JOB_NAME"
 create_unique_dir() {
     local base_path="$1"
     local dir_path="$base_path"
