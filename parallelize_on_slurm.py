@@ -71,9 +71,8 @@ def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_file
     end_idx = min(exp_id * rows_per_worker, total_rows)
     chunk_df = df.iloc[start_idx:end_idx].copy()
     output = chunk_df.apply(lambda row: experiment(
-        {**row.to_dict(), **chunk_df.attrs}), 1, result_type='expand')
+        {**chunk_df.attrs, **row.to_dict()}), 1, result_type='expand') # prioritizes rows over attrs.
     processed_df = pd.concat([chunk_df, output], axis=1)
-    print(processed_df)
     output_file = os.path.join(output_subfolder, f"processed_{exp_id}.pkl")
     processed_df.to_pickle(output_file)
     print(f"Processed rows {start_idx} to {end_idx} saved to {output_file}")
