@@ -88,3 +88,4 @@ sleep 30 # Wait for filesystem sync
 python "$SWEEP_FILE" --cleanup -f "$EXP_FILE" -o "$OUT_DIR" > "$OUT_DIR"/cleanup_stdout.log 2> "$OUT_DIR"/cleanup_ERR.log
 echo "Job $job_id completed at $(date)" > "$OUT_DIR/completed.log"
 ) & disown
+echo "Submission completed"
