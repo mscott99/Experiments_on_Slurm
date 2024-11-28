@@ -68,7 +68,7 @@ def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_file
     chunk_df = df.iloc[start_idx:end_idx].copy()
     def safe_exp(data):
         try:
-            experiment(data)
+            return experiment(data)
         except Exception as e:
             return {"ERROR": traceback.format_exc()} # has the effect of logging errors into the resulting DataFrame
     output = chunk_df.apply(lambda row: safe_exp(
