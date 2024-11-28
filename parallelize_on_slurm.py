@@ -1,3 +1,4 @@
+import traceback
 import argparse
 from typing import Callable, Any, Union
 import glob
@@ -43,11 +44,6 @@ def cleanup(original_df:pd.DataFrame, output_dir, max_retries=3, retry_delay=5):
         experiment_dfs.append(file_obj)
     all_experiments_df = pd.concat(experiment_dfs, ignore_index=False).sort_index()
     all_experiments_df.attrs = original_df.attrs
-    if len(all_experiments_df) != len(original_df):
-        sys.stderr.write("Could not find all experiment results. See the missing rows in MISSING_ROWS.pickle")
-        missing_idx = original_df.index.difference(all_experiments_df.index)
-        original_df.loc[missing_idx].to_pickle(os.path.join(
-        output_dir, "MISSING_ROWS.pickle"))
     all_experiments_df.to_pickle(os.path.join(
         output_dir, "combined_results.pickle"))
 
@@ -70,7 +66,12 @@ def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_file
     start_idx = (exp_id-1) * rows_per_worker
     end_idx = min(exp_id * rows_per_worker, total_rows)
     chunk_df = df.iloc[start_idx:end_idx].copy()
-    output = chunk_df.apply(lambda row: experiment(
+    def safe_exp(data):
+        try:
+            experiment(data)
+        except Exception as e:
+            return {"ERROR": traceback.format_exc()} # has the effect of logging errors into the resulting DataFrame
+    output = chunk_df.apply(lambda row: safe_exp(
         {**chunk_df.attrs, **row.to_dict()}), 1, result_type='expand') # prioritizes rows over attrs.
     processed_df = pd.concat([chunk_df, output], axis=1)
     output_file = os.path.join(output_subfolder, f"processed_{exp_id}.pkl")
