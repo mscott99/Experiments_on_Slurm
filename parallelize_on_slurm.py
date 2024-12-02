@@ -48,9 +48,8 @@ def cleanup(original_df:pd.DataFrame, output_dir, max_retries=3, retry_delay=5):
         output_dir, "combined_results.pickle"))
 
 
-def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_file: str, output_dir: str, exp_id: int, project_dir: str, seed=SEED):
-    sys.path.append(project_dir)
-    module = load_module(exp_file)
+def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_module_path: str, output_dir: str, exp_id: int, project_dir: str, seed=SEED):
+    module = load_module(exp_module_path)
     make_df:Callable[[], pd.DataFrame] = getattr(module, 'make_df')
     experiment:Callable[[Union[dict, pd.Series]], dict[str, Any]] = getattr(module, 'experiment')
     if (get_num_workers):
