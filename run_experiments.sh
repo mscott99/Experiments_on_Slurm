@@ -10,7 +10,7 @@ JOB_NAME="uneven"
 TIME="02:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
 MEMORY="1G"      # Max expected memory for each job
 CPU_NUM="1"
-ROWS_PER_WORKER=100 # 50 ends in 30 ish minutes
+ROWS_PER_WORKER=50 # 50 ends in 30 ish minutes
 
 # ARGUMENTS
 # The first argument is the path of the python sweep file to run
