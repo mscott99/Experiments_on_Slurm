@@ -14,7 +14,6 @@ SEED = 1234
 
 
 def load_module(module_path):
-    print("loading module")
     path = Path(module_path)
     if path.is_dir():
         package_name = path.name
