@@ -50,8 +50,12 @@ def cleanup(original_df:pd.DataFrame, output_dir, max_retries=3, retry_delay=5):
 
 def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_module_path: str, output_dir: str, exp_id: int, project_dir: str, seed=SEED):
     module = load_module(exp_module_path)
+    print(module)
     make_df:Callable[[], pd.DataFrame] = getattr(module, 'make_df')
+    print(make_df)
     experiment:Callable[[Union[dict, pd.Series]], dict[str, Any]] = getattr(module, 'experiment')
+    print(experiment)
+    print(get_num_workers)
     if (get_num_workers):
         print(-(-len(make_df())//rows_per_worker)) # negative signs for good rounding
         return
