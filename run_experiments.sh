@@ -45,6 +45,7 @@ create_unique_dir() {
 OUT_DIR=$(create_unique_dir "$BASE_OUT_DIR")
 mkdir -p "$OUT_DIR"
 END_IND=$(python "$SWEEP_FILE" --get-num-workers -f "$EXP_MODULE_PATH" --rows-per-worker "$ROWS_PER_WORKER" 2> "$OUT_DIR"/err_get_size.log)
+echo "End index returned: ""$END_IND"
 echo "$END_IND" > "$OUT_DIR"/num_workers.log
 
 # Make log output directory
