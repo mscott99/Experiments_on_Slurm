@@ -11,3 +11,5 @@
 ```
 ## Results
 The script produces an output DataFrame which is the DataFrame created by `make_df()` with additional rows containing the results of the experiments. This output will be written to the file `$OUTPUT_DIR/$JOB_NAME/combined_results.pickle`, with the bash variables as specified in `run_experiments.sh`. For quick checks of the results, a printout of the resulting DataFrame is available in `$OUTPUT_DIR/$JOB_NAME/cleanup_stdout`. Other information about individual tasks will be logged in the same directory.
+## Future features
+Add a check before the start of the run, that the dataframe has all required keys.
