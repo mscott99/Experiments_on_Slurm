@@ -5,11 +5,11 @@ USER="mscott99"
 EMAIL="matthewscott@math.ubc.ca"  # Email to send notification to
 VENV_ACTIVATE_PATH="/home/mscott99/projects/def-oyilmaz/mscott99/Sparse_adapted_denoising/venv/bin/activate"
 ACCOUNT="def-oyilmaz"
-JOB_NAME="uneven"
+JOB_NAME="uneven_spgl"
 TIME="02:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
 MEMORY="1024M"      # Max expected memory for each job
 CPU_NUM="1"
-ROWS_PER_WORKER=100 # 50 ends in 30 ish minutes
+ROWS_PER_WORKER=20 # 50 ends in 30 ish minutes
 
 # ARGUMENTS
 # The first argument is the path of the python sweep file to run
