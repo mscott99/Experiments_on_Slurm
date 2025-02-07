@@ -1,4 +1,5 @@
 import traceback
+import subprocess
 import argparse
 from typing import Callable, Any, Union
 import glob
@@ -61,8 +62,21 @@ def cleanup(original_df: pd.DataFrame, output_dir, max_retries=3, retry_delay=5)
             sys.stderr.write("Reading file yields None: " + file)
         experiment_dfs.append(file_obj)
     all_experiments_df = pd.concat(
-        experiment_dfs, ignore_index=False).sort_index()
+        experiment_dfs, ignore_index=False)
+    original_df['experiment_found'] = original_df.index.isin(
+        all_experiments_df.index)
+    all_experiments_df = pd.concat(
+        [all_experiments_df, original_df[original_df['experiment_found'] == False]], ignore_index=False).sort_index()
     all_experiments_df.attrs = original_df.attrs
+    cd_result = subprocess.run(["cd", output_dir])
+    if cd_result.returncode != 0:
+        sys.stderr.write("Could not cd into output directory.")
+    result = subprocess.run(["cat", "./LOGS/*", "./exp_*/err*"], capture_output=True, text=True)   
+    if result.returncode == 0:
+        all_experiments_df.attrs["Slurm logs and experiment errors/warnings"] = result.stdout
+    else:
+        all_experiments_df.attrs["Slurm logs and experiment errors/warnings"] = "Could not fetch logs."
+        sys.stderr.write("Could not read the logs and experiment errors.")
     all_experiments_df.to_pickle(os.path.join(
         output_dir, "combined_results.pickle"))
 
