@@ -74,17 +74,28 @@ def cleanup(original_df: pd.DataFrame, output_dir, max_retries=3, retry_delay=5)
         all_experiments_df.attrs = original_df.attrs
 
     # Fetch other logs and add them to attributes.
-    cd_result = subprocess.run(["cd", output_dir])
-    if cd_result.returncode != 0:
-        sys.stderr.write("Could not cd into output directory.")
-    result = subprocess.run(["cat", "./LOGS/*", "./exp_*/err*"], capture_output=True, text=True)   
-    if result.returncode == 0:
-        all_experiments_df.attrs["Slurm logs and experiment errors/warnings"] = result.stdout
-    else:
+    try:
+        # Use cwd parameter to change directory for the subprocess
+        result = subprocess.run(["cat"] + glob.glob(f"{output_dir}/LOGS/*") + glob.glob(f"{output_dir}/exp_*/err*"), 
+                                capture_output=True, text=True, cwd=output_dir)
+        
+        if result.returncode == 0:
+            all_experiments_df.attrs["Slurm logs and experiment errors/warnings"] = result.stdout
+        else:
+            all_experiments_df.attrs["Slurm logs and experiment errors/warnings"] = "Could not fetch logs."
+            sys.stderr.write("Could not read the logs and experiment errors.\n")
+    except Exception as e:
         all_experiments_df.attrs["Slurm logs and experiment errors/warnings"] = "Could not fetch logs."
-        sys.stderr.write("Could not read the logs and experiment errors.")
-    all_experiments_df.to_pickle(os.path.join(
-        output_dir, "combined_results.pickle"))
+        sys.stderr.write(f"An error occurred: {e}\n")
+
+    # result = subprocess.run(["cat", "./LOGS/*", "./exp_*/err*"], capture_output=True, text=True, cwd = output_dir)   
+    # if result.returncode == 0:
+    #     all_experiments_df.attrs["Slurm logs and experiment errors/warnings"] = result.stdout
+    # else:
+    #     all_experiments_df.attrs["Slurm logs and experiment errors/warnings"] = "Could not fetch logs.\n"
+    #     sys.stderr.write("Could not read the logs and experiment errors.")
+    # all_experiments_df.to_pickle(os.path.join(
+    #     output_dir, "combined_results.pickle"))
 
 
 def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_module_path: str, output_dir: str, exp_id: int, project_dir: str, seed=SEED):
