@@ -61,13 +61,19 @@ def cleanup(original_df: pd.DataFrame, output_dir, max_retries=3, retry_delay=5)
         if (file_obj is None):
             sys.stderr.write("Reading file yields None: " + file)
         experiment_dfs.append(file_obj)
-    all_experiments_df = pd.concat(
-        experiment_dfs, ignore_index=False)
-    original_df['experiment_found'] = original_df.index.isin(
-        all_experiments_df.index)
-    all_experiments_df = pd.concat(
-        [all_experiments_df, original_df[original_df['experiment_found'] == False]], ignore_index=False).sort_index()
-    all_experiments_df.attrs = original_df.attrs
+    if experiment_dfs == []:
+        all_experiments_df = original_df.copy()
+        all_experiments_df['experiment_found'] = False
+    else:
+        all_experiments_df = pd.concat(
+            experiment_dfs, ignore_index=False)
+        original_df['experiment_found'] = original_df.index.isin(
+            all_experiments_df.index)
+        all_experiments_df = pd.concat(
+            [all_experiments_df, original_df[original_df['experiment_found'] == False]], ignore_index=False).sort_index()
+        all_experiments_df.attrs = original_df.attrs
+
+    # Fetch other logs and add them to attributes.
     cd_result = subprocess.run(["cd", output_dir])
     if cd_result.returncode != 0:
         sys.stderr.write("Could not cd into output directory.")
