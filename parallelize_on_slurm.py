@@ -4,7 +4,6 @@ import argparse
 from typing import Callable, Any, Union
 import glob
 import os
-from re import error
 import pandas as pd
 import sys
 import importlib.util
@@ -94,8 +93,9 @@ def cleanup(original_df: pd.DataFrame, output_dir, max_retries=3, retry_delay=5)
     # else:
     #     all_experiments_df.attrs["Slurm logs and experiment errors/warnings"] = "Could not fetch logs.\n"
     #     sys.stderr.write("Could not read the logs and experiment errors.")
-    # all_experiments_df.to_pickle(os.path.join(
-    #     output_dir, "combined_results.pickle"))
+
+    all_experiments_df.to_pickle(os.path.join(
+        output_dir, "combined_results.pickle"))
 
 
 def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_module_path: str, output_dir: str, exp_id: int, project_dir: str, seed=SEED):
