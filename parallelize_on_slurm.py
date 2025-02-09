@@ -43,6 +43,22 @@ def load_module(module_path):
     return module
 
 
+def concatenate_experiments(original_df, experiment_dfs):
+    if experiment_dfs == []:
+        all_experiments_df = original_df.copy()
+        all_experiments_df['experiment_found'] = False
+        return all_experiments_df
+    all_experiments_df = pd.concat(
+        experiment_dfs, ignore_index=False)
+    all_experiments_df['experiment_found'] = True
+    original_df['experiment_found'] = original_df.index.isin(
+        all_experiments_df.index)
+    all_experiments_df = pd.concat(
+        [all_experiments_df, original_df[original_df['experiment_found'] == False]], ignore_index=False).sort_index()
+    all_experiments_df.attrs = original_df.attrs
+    return all_experiments_df
+
+
 def cleanup(original_df: pd.DataFrame, output_dir, max_retries=3, retry_delay=5):
     pickle_glob = os.path.join(output_dir, "exp_*/processed_*.pkl")
     experiment_dfs = []
@@ -60,34 +76,25 @@ def cleanup(original_df: pd.DataFrame, output_dir, max_retries=3, retry_delay=5)
         if (file_obj is None):
             sys.stderr.write("Reading file yields None: " + file)
         experiment_dfs.append(file_obj)
-    if experiment_dfs == []:
-        all_experiments_df = original_df.copy()
-        all_experiments_df['experiment_found'] = False
-    else:
-        all_experiments_df = pd.concat(
-            experiment_dfs, ignore_index=False)
-        original_df['experiment_found'] = original_df.index.isin(
-            all_experiments_df.index)
-        all_experiments_df = pd.concat(
-            [all_experiments_df, original_df[original_df['experiment_found'] == False]], ignore_index=False).sort_index()
-        all_experiments_df.attrs = original_df.attrs
+
+    all_experiments_df = concatenate_experiments(original_df, experiment_dfs)
 
     # Fetch other logs and add them to attributes.
     try:
         # Use cwd parameter to change directory for the subprocess
-        result = subprocess.run(["cat"] + glob.glob(f"{output_dir}/LOGS/*") + glob.glob(f"{output_dir}/exp_*/err*"), 
+        result = subprocess.run(["cat"] + glob.glob(f"{output_dir}/LOGS/*") + glob.glob(f"{output_dir}/exp_*/err*"),
                                 capture_output=True, text=True, cwd=output_dir)
-        
         if result.returncode == 0:
             all_experiments_df.attrs["Slurm logs and experiment errors/warnings"] = result.stdout
         else:
             all_experiments_df.attrs["Slurm logs and experiment errors/warnings"] = "Could not fetch logs."
-            sys.stderr.write("Could not read the logs and experiment errors.\n")
+            sys.stderr.write(
+                "Could not read the logs and experiment errors.\n")
     except Exception as e:
         all_experiments_df.attrs["Slurm logs and experiment errors/warnings"] = "Could not fetch logs."
         sys.stderr.write(f"An error occurred: {e}\n")
 
-    # result = subprocess.run(["cat", "./LOGS/*", "./exp_*/err*"], capture_output=True, text=True, cwd = output_dir)   
+    # result = subprocess.run(["cat", "./LOGS/*", "./exp_*/err*"], capture_output=True, text=True, cwd = output_dir)
     # if result.returncode == 0:
     #     all_experiments_df.attrs["Slurm logs and experiment errors/warnings"] = result.stdout
     # else:
