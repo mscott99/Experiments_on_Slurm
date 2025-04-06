@@ -9,7 +9,7 @@ JOB_NAME="March_2025"
 TIME="03:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
 MEMORY="3G"      # 
 CPU_NUM="1"
-ROWS_PER_WORKER=2 # 10 for sparse.
+ROWS_PER_WORKER=10 # 10 for sparse.
 
 # ARGUMENTS
 # The first argument is the path of the python sweep file to run
