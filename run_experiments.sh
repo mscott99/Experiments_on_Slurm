@@ -3,7 +3,8 @@
 
 USER="mscott99"
 EMAIL="matthewscott@math.ubc.ca"  # Email to send notification to
-VENV_ACTIVATE_PATH="/home/mscott99/projects/def-oyilmaz/mscott99/Sparse_adapted_denoising/venv/bin/activate"
+export PROJECT="/home/mscott99/projects/def-oyilmaz/mscott99/Sparse_adapted_denoising" # accessed by the experiment to load data.
+VENV_ACTIVATE_PATH="$PROJECT/venv/bin/activate"
 ACCOUNT="def-oyilmaz"
 JOB_NAME="March_2025"
 TIME="03:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
