@@ -3,8 +3,6 @@
 
 USER="mscott99"
 EMAIL="matthewscott@math.ubc.ca"  # Email to send notification to
-export PROJECT="/home/mscott99/projects/def-oyilmaz/mscott99/Sparse_adapted_denoising" # accessed by the experiment to load data.
-VENV_ACTIVATE_PATH="$PROJECT/.venv/bin/activate"
 ACCOUNT="def-oyilmaz"
 JOB_NAME="Mai_2025"
 TIME="03:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
@@ -16,11 +14,13 @@ ROWS_PER_WORKER=200 # 10 for sparse, 20 for gen MNIST.
 # The first argument is the path of the python sweep file to run
 # The second argument is the experiment file, which must specify the "make_df" function and the "experiment function"
 if [ "$#" -ne 3 ]; then
-    echo "Usage: $0 <SWEEP_FILE> <EXPERIMENT_MODULE_PATH> <OUT_DIR>"
+    echo "Usage: $0 <SWEEP_FILE> <PROJECT_PATH> <OUT_DIR>"
     exit 1
 fi
 SWEEP_FILE="$1"
-EXP_MODULE_PATH="$2"
+PROJECT_PATH="$2"
+export PROJECT="$PROJECT_PATH"/sparse_recov
+VENV_ACTIVATE_PATH="$PROJECT_PATH/.venv/bin/activate"
 BASE_OUT_DIR="$3"
 
 module load StdEnv
@@ -46,7 +46,7 @@ create_unique_dir() {
 }
 OUT_DIR=$(create_unique_dir "$JOB_OUT_DIR")
 mkdir -p "$OUT_DIR"
-END_IND=$(python "$SWEEP_FILE" --get-num-workers -f "$EXP_MODULE_PATH" --rows-per-worker "$ROWS_PER_WORKER" 2> "$OUT_DIR"/err_get_size.log)
+END_IND=$(python "$SWEEP_FILE" --get-num-workers -f "$PROJECT_PATH" --rows-per-worker "$ROWS_PER_WORKER" 2> "$OUT_DIR"/err_get_size.log)
 echo "$END_IND" > "$OUT_DIR"/num_workers.log
 
 # Make log output directory
@@ -73,7 +73,7 @@ module load scipy-stack
 
 source "$VENV_ACTIVATE_PATH"
 mkdir -p $OUT_DIR/exp_\$SLURM_ARRAY_TASK_ID
-python "$SWEEP_FILE" --rows-per-worker $ROWS_PER_WORKER -f "$EXP_MODULE_PATH" -o $OUT_DIR --only-exp-id \$SLURM_ARRAY_TASK_ID  > $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/stdout_\${SLURM_ARRAY_TASK_ID} 2> $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/err_\$SLURM_ARRAY_TASK_ID 
+python "$SWEEP_FILE" --rows-per-worker $ROWS_PER_WORKER -f "$PROJECT_PATH" -o $OUT_DIR --only-exp-id \$SLURM_ARRAY_TASK_ID  > $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/stdout_\${SLURM_ARRAY_TASK_ID} 2> $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/err_\$SLURM_ARRAY_TASK_ID 
 HEREDOC
 )
 
@@ -85,7 +85,7 @@ while sacct -j "$job_id" -n -o state | grep -qE 'PENDING|RUNNING'; do
     sleep 10
 done
 sleep 30 # Wait for filesystem sync
-python "$SWEEP_FILE" --cleanup -f "$EXP_MODULE_PATH" -o "$OUT_DIR" > "$OUT_DIR"/cleanup_stdout.log 2> "$OUT_DIR"/cleanup_ERR.log
+python "$SWEEP_FILE" --cleanup -f "$PROJECT_PATH" -o "$OUT_DIR" > "$OUT_DIR"/cleanup_stdout.log 2> "$OUT_DIR"/cleanup_ERR.log
 echo "Job $job_id completed at $(date)" > "$OUT_DIR/completed.log"
 if [ -f "$BASE_OUT_DIR"/../running.lock ]; then
     rm "$BASE_OUT_DIR"/../running.lock
