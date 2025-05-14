@@ -86,7 +86,7 @@ while sacct -j "$job_id" -n -o state | grep -qE 'PENDING|RUNNING'; do
     sleep 10
 done
 sleep 30 # Wait for filesystem sync
-python "$SWEEP_FILE" --cleanup -f "$PROJECT_PATH" -o "$OUT_DIR" > "$OUT_DIR"/cleanup_stdout.log 2> "$OUT_DIR"/cleanup_ERR.log
+python "$SWEEP_FILE" --cleanup -f "$PROJECT" -o "$OUT_DIR" > "$OUT_DIR"/cleanup_stdout.log 2> "$OUT_DIR"/cleanup_ERR.log
 echo "Job $job_id completed at $(date)" > "$OUT_DIR/completed.log"
 if [ -f "$BASE_OUT_DIR"/../running.lock ]; then
     rm "$BASE_OUT_DIR"/../running.lock
