@@ -4,7 +4,7 @@
 USER="mscott99"
 EMAIL="matthewscott@math.ubc.ca"  # Email to send notification to
 export PROJECT="/home/mscott99/projects/def-oyilmaz/mscott99/Sparse_adapted_denoising" # accessed by the experiment to load data.
-VENV_ACTIVATE_PATH="$PROJECT/venv/bin/activate"
+VENV_ACTIVATE_PATH="$PROJECT/.venv/bin/activate"
 ACCOUNT="def-oyilmaz"
 JOB_NAME="Mai_2025"
 TIME="03:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
@@ -15,19 +15,20 @@ ROWS_PER_WORKER=200 # 10 for sparse, 20 for gen MNIST.
 # ARGUMENTS
 # The first argument is the path of the python sweep file to run
 # The second argument is the experiment file, which must specify the "make_df" function and the "experiment function"
-if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 <SWEEP_FILE> <EXPERIMENT_MODULE_PATH>"
+if [ "$#" -ne 3 ]; then
+    echo "Usage: $0 <SWEEP_FILE> <EXPERIMENT_MODULE_PATH> <OUT_DIR>"
     exit 1
 fi
 SWEEP_FILE="$1"
 EXP_MODULE_PATH="$2"
+BASE_OUT_DIR="$3"
 
 module load StdEnv
 module load python
 module load scipy-stack
 source "$VENV_ACTIVATE_PATH"
 
-BASE_OUT_DIR="/home/$USER/scratch/sweep_out/$JOB_NAME"
+JOB_OUT_DIR="$BASE_OUT_DIR"/"$JOB_NAME"
 create_unique_dir() {
     local base_path="$1"
     local dir_path="$base_path"
@@ -43,7 +44,7 @@ create_unique_dir() {
     mkdir -p "$dir_path"
     echo "$dir_path"
 }
-OUT_DIR=$(create_unique_dir "$BASE_OUT_DIR")
+OUT_DIR=$(create_unique_dir "$JOB_OUT_DIR")
 mkdir -p "$OUT_DIR"
 END_IND=$(python "$SWEEP_FILE" --get-num-workers -f "$EXP_MODULE_PATH" --rows-per-worker "$ROWS_PER_WORKER" 2> "$OUT_DIR"/err_get_size.log)
 echo "$END_IND" > "$OUT_DIR"/num_workers.log
@@ -77,7 +78,6 @@ HEREDOC
 )
 
 job_id=${job_id##* }
-echo "Submitted job with ID ${job_id}"
 echo "$job_id" > $OUT_DIR/JOB_ID
 (
 sleep 30 # Give enough time for the system to register the job before checking
@@ -87,5 +87,8 @@ done
 sleep 30 # Wait for filesystem sync
 python "$SWEEP_FILE" --cleanup -f "$EXP_MODULE_PATH" -o "$OUT_DIR" > "$OUT_DIR"/cleanup_stdout.log 2> "$OUT_DIR"/cleanup_ERR.log
 echo "Job $job_id completed at $(date)" > "$OUT_DIR/completed.log"
+if [ -f "$BASE_OUT_DIR"/../running.lock ]; then
+    rm "$BASE_OUT_DIR"/../running.lock
+fi
 ) & disown
-echo "Submission completed"
+echo "Submitted job with ID ${job_id}"
