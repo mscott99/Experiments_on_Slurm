@@ -73,7 +73,7 @@ module load scipy-stack
 
 source "$VENV_ACTIVATE_PATH"
 mkdir -p $OUT_DIR/exp_\$SLURM_ARRAY_TASK_ID
-python "$SWEEP_FILE" --rows-per-worker $ROWS_PER_WORKER -f "$PROJECT" -o $OUT_DIR --only-exp-id \$SLURM_ARRAY_TASK_ID  > $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/stdout_\${SLURM_ARRAY_TASK_ID} 2> $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/err_\$SLURM_ARRAY_TASK_ID 
+python "$SWEEP_FILE" --rows-per-worker $ROWS_PER_WORKER -f "$PROJECT_PATH" -o $OUT_DIR --only-exp-id \$SLURM_ARRAY_TASK_ID  > $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/stdout_\${SLURM_ARRAY_TASK_ID} 2> $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/err_\$SLURM_ARRAY_TASK_ID 
 HEREDOC
 )
 
