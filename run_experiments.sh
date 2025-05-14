@@ -20,6 +20,7 @@ fi
 SWEEP_FILE="$1"
 PROJECT_PATH="$2"
 export PROJECT="$PROJECT_PATH"/sparse_recov
+EXP_MODULE_PATH="$PROJECT_PATH"/sparse_recov
 VENV_ACTIVATE_PATH="$PROJECT_PATH/.venv/bin/activate"
 BASE_OUT_DIR="$3"
 
@@ -46,7 +47,7 @@ create_unique_dir() {
 }
 OUT_DIR=$(create_unique_dir "$JOB_OUT_DIR")
 mkdir -p "$OUT_DIR"
-END_IND=$(python "$SWEEP_FILE" --get-num-workers -f "$PROJECT_PATH" --rows-per-worker "$ROWS_PER_WORKER" 2> "$OUT_DIR"/err_get_size.log)
+END_IND=$(python "$SWEEP_FILE" --get-num-workers -f "$EXP_MODULE_PATH" --rows-per-worker "$ROWS_PER_WORKER" 2> "$OUT_DIR"/err_get_size.log)
 echo "$END_IND" > "$OUT_DIR"/num_workers.log
 
 # Make log output directory
@@ -73,7 +74,7 @@ module load scipy-stack
 
 source "$VENV_ACTIVATE_PATH"
 mkdir -p $OUT_DIR/exp_\$SLURM_ARRAY_TASK_ID
-python "$SWEEP_FILE" --rows-per-worker $ROWS_PER_WORKER -f "$PROJECT" -o $OUT_DIR --only-exp-id \$SLURM_ARRAY_TASK_ID  > $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/stdout_\${SLURM_ARRAY_TASK_ID} 2> $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/err_\$SLURM_ARRAY_TASK_ID 
+python "$SWEEP_FILE" --rows-per-worker $ROWS_PER_WORKER -f "$EXP_MODULE_PATH" -o $OUT_DIR --only-exp-id \$SLURM_ARRAY_TASK_ID  > $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/stdout_\${SLURM_ARRAY_TASK_ID} 2> $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/err_\$SLURM_ARRAY_TASK_ID 
 HEREDOC
 )
 
