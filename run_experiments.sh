@@ -19,7 +19,7 @@ if [ "$#" -ne 3 ]; then
 fi
 SWEEP_FILE="$1"
 PROJECT_PATH="$2"
-export PROJECT="$PROJECT_PATH"/sparse_recov
+export PROJECT="$PROJECT_PATH"
 EXP_MODULE_PATH="$PROJECT_PATH"/sparse_recov
 VENV_ACTIVATE_PATH="$PROJECT_PATH/.venv/bin/activate"
 BASE_OUT_DIR="$3"
@@ -86,7 +86,7 @@ while sacct -j "$job_id" -n -o state | grep -qE 'PENDING|RUNNING'; do
     sleep 10
 done
 sleep 30 # Wait for filesystem sync
-python "$SWEEP_FILE" --cleanup -f "$PROJECT" -o "$OUT_DIR" > "$OUT_DIR"/cleanup_stdout.log 2> "$OUT_DIR"/cleanup_ERR.log
+python "$SWEEP_FILE" --cleanup -f "$EXP_MODULE_PATH" -o "$OUT_DIR" > "$OUT_DIR"/cleanup_stdout.log 2> "$OUT_DIR"/cleanup_ERR.log
 echo "Job $job_id completed at $(date)" > "$OUT_DIR/completed.log"
 if [ -f "$BASE_OUT_DIR"/../running.lock ]; then
     rm "$BASE_OUT_DIR"/../running.lock
