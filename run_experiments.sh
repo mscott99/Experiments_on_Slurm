@@ -22,6 +22,7 @@ PROJECT_PATH="$2"
 export PROJECT="$PROJECT_PATH"
 EXP_MODULE_PATH="$PROJECT_PATH"/sparse_recov
 VENV_ACTIVATE_PATH="$PROJECT_PATH/.venv/bin/activate"
+PROJECT_HEAD=$(git --git-dir=$PROJECT_PATH/.git rev-parse HEAD)
 BASE_OUT_DIR="$3"
 
 module load StdEnv
@@ -74,7 +75,7 @@ module load scipy-stack
 
 source "$VENV_ACTIVATE_PATH"
 mkdir -p $OUT_DIR/exp_\$SLURM_ARRAY_TASK_ID
-python "$SWEEP_FILE" --rows-per-worker $ROWS_PER_WORKER -f "$EXP_MODULE_PATH" -o $OUT_DIR --only-exp-id \$SLURM_ARRAY_TASK_ID  > $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/stdout_\${SLURM_ARRAY_TASK_ID} 2> $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/err_\$SLURM_ARRAY_TASK_ID 
+python "$SWEEP_FILE" --rows-per-worker $ROWS_PER_WORKER -f "$EXP_MODULE_PATH" -o $OUT_DIR --only-exp-id \$SLURM_ARRAY_TASK_ID -c "$PROJECT_HEAD"  > $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/stdout_\${SLURM_ARRAY_TASK_ID} 2> $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/err_\$SLURM_ARRAY_TASK_ID 
 HEREDOC
 )
 

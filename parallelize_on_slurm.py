@@ -105,7 +105,7 @@ def cleanup(original_df: pd.DataFrame, output_dir, max_retries=3, retry_delay=5)
         output_dir, "combined_results.pickle"))
 
 
-def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_module_path: str, output_dir: str, exp_id: int, project_dir: str, seed=SEED):
+def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_module_path: str, output_dir: str, exp_id: int, project_dir: str, commit:str, seed=SEED):
     module = load_module(exp_module_path)
     make_df: Callable[[], pd.DataFrame] = getattr(module, 'make_df')
     experiment: Callable[[Union[dict, pd.Series]],
@@ -135,6 +135,7 @@ def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_modu
         # prioritizes rows over attrs.
         {**chunk_df.attrs, **row.to_dict()}), 1, result_type='expand')
     processed_df = pd.concat([chunk_df, output], axis=1)
+    processed_df.attrs["commit"] = commit
     output_file = os.path.join(output_subfolder, f"processed_{exp_id}.pkl")
     processed_df.to_pickle(output_file)
     print(f"Processed rows {start_idx} to {end_idx} saved to {output_file}")
@@ -155,8 +156,10 @@ if __name__ == "__main__":
                         help="ID of the experiment.")
     parser.add_argument("-p", "--project-dir", required=False,
                         help="Path to project dir with possible dependent scripts to import with python.")
+    parser.add_argument("-c", "--commit", required=False,
+                        help="Current commit hash of the experiment function.")
     parser.add_argument("-o", "--output-dir", required=False,
                         help="Output directory")
     args = parser.parse_args()
     main(args.get_num_workers, args.cleanup, args.rows_per_worker, args.exp_file,
-         args.output_dir, args.only_exp_id, args.project_dir)
+         args.output_dir, args.only_exp_id, args.project_dir, args.commit)
