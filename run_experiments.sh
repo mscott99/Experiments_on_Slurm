@@ -8,7 +8,8 @@ JOB_NAME="Mai_2025"
 TIME="03:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
 MEMORY="3G"      # 
 CPU_NUM="1"
-ROWS_PER_WORKER=200 # 10 for sparse, 20 for gen MNIST.
+GPU_NUM="0"
+ROWS_PER_WORKER=20 # 10 for sparse, 20 for gen MNIST.
 
 # ARGUMENTS
 # The first argument is the path of the python sweep file to run
@@ -61,6 +62,7 @@ job_id=$(sbatch << HEREDOC
 #SBATCH --time="$TIME"
 #SBATCH --array=1-"$END_IND"
 #SBATCH --cpus-per-task="$CPU_NUM"
+#SBATCH --gpus-per-task="$GPU_NUM"
 #SBATCH --output="$OUT_DIR"/Logs/bash_task_out_%A_%a.out
 #SBATCH --account="$ACCOUNT"
 #SBATCH --mem="$MEMORY"
