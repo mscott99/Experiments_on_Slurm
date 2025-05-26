@@ -23,7 +23,7 @@ PROJECT_PATH="$2"
 export PROJECT="$PROJECT_PATH"
 EXP_MODULE_PATH="$PROJECT_PATH"/sparse_recov
 VENV_ACTIVATE_PATH="$PROJECT_PATH/.venv/bin/activate"
-PROJECT_HEAD=$(git --git-dir=$PROJECT_PATH/.git rev-parse HEAD)
+PROJECT_HEAD=$(git --git-dir="$PROJECT_PATH"/.git rev-parse HEAD)
 BASE_OUT_DIR="$3"
 
 module load StdEnv
@@ -77,19 +77,19 @@ module load scipy-stack
 
 source "$VENV_ACTIVATE_PATH"
 mkdir -p $OUT_DIR/exp_\$SLURM_ARRAY_TASK_ID
-python "$SWEEP_FILE" --rows-per-worker $ROWS_PER_WORKER -f "$EXP_MODULE_PATH" -o $OUT_DIR --only-exp-id \$SLURM_ARRAY_TASK_ID -c "$PROJECT_HEAD"  > $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/stdout_\${SLURM_ARRAY_TASK_ID} 2> $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/err_\$SLURM_ARRAY_TASK_ID 
+python "$SWEEP_FILE" --rows-per-worker $ROWS_PER_WORKER -f "$EXP_MODULE_PATH" -o $OUT_DIR --only-exp-id \$SLURM_ARRAY_TASK_ID > $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/stdout_\${SLURM_ARRAY_TASK_ID} 2> $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/err_\$SLURM_ARRAY_TASK_ID 
 HEREDOC
 )
 
 job_id=${job_id##* }
-echo "$job_id" > $OUT_DIR/JOB_ID
+echo "$job_id" > "$OUT_DIR"/JOB_ID
 (
 sleep 30 # Give enough time for the system to register the job before checking
 while sacct -j "$job_id" -n -o state | grep -qE 'PENDING|RUNNING'; do
     sleep 10
 done
 sleep 30 # Wait for filesystem sync
-python "$SWEEP_FILE" --cleanup -f "$EXP_MODULE_PATH" -o "$OUT_DIR" > "$OUT_DIR"/cleanup_stdout.log 2> "$OUT_DIR"/cleanup_ERR.log
+python "$SWEEP_FILE" --cleanup -f "$EXP_MODULE_PATH" -o "$OUT_DIR"  -c "$PROJECT_HEAD" > "$OUT_DIR"/cleanup_stdout.log 2> "$OUT_DIR"/cleanup_ERR.log
 echo "Job $job_id completed at $(date)" > "$OUT_DIR/completed.log"
 if [ -f "$BASE_OUT_DIR"/../running.lock ]; then
     rm "$BASE_OUT_DIR"/../running.lock

@@ -59,7 +59,7 @@ def concatenate_experiments(original_df, experiment_dfs):
     return all_experiments_df
 
 
-def cleanup(original_df: pd.DataFrame, output_dir, max_retries=3, retry_delay=5):
+def cleanup(original_df: pd.DataFrame, output_dir, commit:str, max_retries=3, retry_delay=5):
     pickle_glob = os.path.join(output_dir, "exp_*/processed_*.pkl")
     experiment_dfs = []
     file_obj = None
@@ -94,6 +94,9 @@ def cleanup(original_df: pd.DataFrame, output_dir, max_retries=3, retry_delay=5)
         all_experiments_df.attrs["Slurm logs and experiment errors/warnings"] = "Could not fetch logs."
         sys.stderr.write(f"An error occurred: {e}\n")
 
+    # add the commit attribute.
+    all_experiments_df.attrs["commit"] = commit
+
     # result = subprocess.run(["cat", "./LOGS/*", "./exp_*/err*"], capture_output=True, text=True, cwd = output_dir)
     # if result.returncode == 0:
     #     all_experiments_df.attrs["Slurm logs and experiment errors/warnings"] = result.stdout
@@ -116,7 +119,7 @@ def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_modu
         return
     df = make_df().sample(frac=1, random_state=seed)
     if (do_cleanup):
-        cleanup(df, output_dir)
+        cleanup(df, output_dir, commit)
         return
     output_subfolder = os.path.join(output_dir, "exp_" + str(exp_id))
     os.makedirs(output_subfolder, exist_ok=True)
@@ -135,7 +138,6 @@ def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_modu
         # prioritizes rows over attrs.
         {**chunk_df.attrs, **row.to_dict()}), 1, result_type='expand')
     processed_df = pd.concat([chunk_df, output], axis=1)
-    processed_df.attrs["commit"] = commit
     output_file = os.path.join(output_subfolder, f"processed_{exp_id}.pkl")
     processed_df.to_pickle(output_file)
     print(f"Processed rows {start_idx} to {end_idx} saved to {output_file}")
