@@ -22,7 +22,6 @@ SWEEP_FILE="$1"
 PROJECT_PATH="$2"
 export PROJECT="$PROJECT_PATH"
 EXP_MODULE_PATH="$PROJECT_PATH"/sparse_recov
-export DATA_DIR="$PROJECT_PATH"/datasets
 VENV_ACTIVATE_PATH="$PROJECT_PATH/.venv/bin/activate"
 PROJECT_HEAD=$(git --git-dir="$PROJECT_PATH"/.git rev-parse HEAD)
 BASE_OUT_DIR="$3"
