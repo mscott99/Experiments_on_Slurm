@@ -7,9 +7,9 @@ ACCOUNT="def-oyilmaz"
 JOB_NAME="Mai_2025"
 TIME="03:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
 MEMORY="3G"      # 
-CPU_NUM="1"
-GPU_NUM="0"
-ROWS_PER_WORKER=100 # 10 for sparse, 20 for gen MNIST.
+CPU_NUM="2"
+GPU_NUM="1"
+ROWS_PER_WORKER=2 # 10 for sparse, 20 for gen MNIST.
 
 # ARGUMENTS
 # The first argument is the path of the python sweep file to run
@@ -22,6 +22,7 @@ SWEEP_FILE="$1"
 PROJECT_PATH="$2"
 export PROJECT="$PROJECT_PATH"
 EXP_MODULE_PATH="$PROJECT_PATH"/sparse_recov
+export DATA_DIR="$PROJECT_PATH"/datasets
 VENV_ACTIVATE_PATH="$PROJECT_PATH/.venv/bin/activate"
 PROJECT_HEAD=$(git --git-dir="$PROJECT_PATH"/.git rev-parse HEAD)
 BASE_OUT_DIR="$3"
