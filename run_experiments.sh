@@ -7,8 +7,8 @@ ACCOUNT="def-oyilmaz"
 JOB_NAME="Mai_2025"
 TIME="03:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
 MEMORY="3G"      # 
-CPU_NUM="2"
-GPU_NUM="1"
+CPU_NUM="1"
+GPU_NUM="0"
 ROWS_PER_WORKER=10 # 10 for sparse, 20 for gen MNIST.
 
 # ARGUMENTS
