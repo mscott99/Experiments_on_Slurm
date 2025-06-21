@@ -22,14 +22,15 @@ SWEEP_FILE="$1"
 PROJECT_PATH="$2"
 export PROJECT="$PROJECT_PATH"
 EXP_MODULE_PATH="$PROJECT_PATH"/sparse_recov
-VENV_ACTIVATE_PATH="$PROJECT_PATH/.venv/bin/activate"
+if [ -z "$VENV_ACTIVATE_PATH" ]; then
+    VENV_ACTIVATE_PATH="$PROJECT_PATH/.venv/bin/activate"
+fi
 PROJECT_HEAD=$(git --git-dir="$PROJECT_PATH"/.git rev-parse HEAD)
 BASE_OUT_DIR="$3"
 
 module load StdEnv
 module load python
 module load scipy-stack
-source "$VENV_ACTIVATE_PATH"
 
 JOB_OUT_DIR="$BASE_OUT_DIR"/"$JOB_NAME"
 create_unique_dir() {
