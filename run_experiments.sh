@@ -33,6 +33,8 @@ module load StdEnv
 module load python
 module load scipy-stack
 
+source "$VENV_ACTIVATE_PATH"
+
 JOB_OUT_DIR="$BASE_OUT_DIR"/"$JOB_NAME"
 create_unique_dir() {
     local base_path="$1"
