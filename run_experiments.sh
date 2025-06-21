@@ -7,9 +7,9 @@ ACCOUNT="def-oyilmaz"
 JOB_NAME="Mai_2025"
 TIME="03:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
 MEMORY="3G"      # 
-CPU_NUM="1"
-GPU_NUM="0"
-ROWS_PER_WORKER=40 # 40 for sparse, 20 for gen MNIST.
+CPU_NUM="2"
+GPU_NUM="1"
+ROWS_PER_WORKER=30 # 40 for sparse, 20 for gen MNIST.
 
 # ARGUMENTS
 # The first argument is the path of the python sweep file to run
