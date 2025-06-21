@@ -25,6 +25,7 @@ EXP_MODULE_PATH="$PROJECT_PATH"/sparse_recov
 if [ -z "$VENV_ACTIVATE_PATH" ]; then
     VENV_ACTIVATE_PATH="$PROJECT_PATH/.venv/bin/activate"
 fi
+echo $VENV_ACTIVATE_PATH
 PROJECT_HEAD=$(git --git-dir="$PROJECT_PATH"/.git rev-parse HEAD)
 BASE_OUT_DIR="$3"
 
