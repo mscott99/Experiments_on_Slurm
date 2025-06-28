@@ -131,11 +131,9 @@ def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_modu
     def safe_exp(data):
         try:
             return experiment(data)
-        except Exception as e:
-            # has the effect of logging errors into the resulting DataFrame
+        except Exception:
             return {"ERROR": traceback.format_exc()}
     output = chunk_df.apply(lambda row: safe_exp(
-        # prioritizes rows over attrs.
         {**chunk_df.attrs, **row.to_dict()}), 1, result_type='expand')
     processed_df = pd.concat([chunk_df, output], axis=1)
     output_file = os.path.join(output_subfolder, f"processed_{exp_id}.pkl")
