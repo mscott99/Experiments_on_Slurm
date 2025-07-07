@@ -113,6 +113,17 @@ def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_modu
     make_df: Callable[[], pd.DataFrame] = getattr(module, 'make_df')
     experiment: Callable[[Union[dict, pd.Series]],
                          dict[str, Any]] = getattr(module, 'experiment')
+
+    # Cheap check for required functions
+    if make_df is None:
+        raise AttributeError("Module does not contain 'make_df' function")
+    if not callable(make_df):
+        raise TypeError("'make_df' is not callable")
+    if experiment is None:
+        raise AttributeError("Module does not contain 'experiment' function")
+    if not callable(experiment):
+        raise TypeError("'experiment' is not callable")
+
     if (get_num_workers):
         df = make_df()
         if not isinstance(df, pd.DataFrame):
