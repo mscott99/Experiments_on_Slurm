@@ -114,10 +114,14 @@ def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_modu
     experiment: Callable[[Union[dict, pd.Series]],
                          dict[str, Any]] = getattr(module, 'experiment')
     if (get_num_workers):
+        df = make_df()
+        if not isinstance(df, pd.DataFrame):
+            raise ValueError("make_df() must return a pandas DataFrame")
         # negative signs for good rounding
-        print(-(-len(make_df())//rows_per_worker))
+        print(-(-len(df)//rows_per_worker))
         return
-    df = make_df().sample(frac=1, random_state=seed)
+
+    df = make_df().sample(frac=1, random_state=seed) #shuffle
     if (do_cleanup):
         cleanup(df, output_dir, commit)
         return
