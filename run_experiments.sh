@@ -71,6 +71,11 @@ mkdir -p "$OUT_DIR"
 END_IND=$(python "$SWEEP_FILE" --get-num-workers -f "$EXPERIMENT_MODULE" --rows-per-worker "$ROWS_PER_WORKER" 2> "$OUT_DIR"/err_get_size.log)
 echo "$END_IND" > "$OUT_DIR"/num_workers.log
 
+if ! [[ "$END_IND" =~ ^[0-9]+$ ]]; then
+    echo "Error: END_IND is not a valid integer. Value received: $END_IND"
+    exit 1
+fi
+
 # Make log output directory
 
 # let PYTHONPATH="$PYTHONPATH":"$PROJECT_DIR"
