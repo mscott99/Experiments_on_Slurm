@@ -6,26 +6,27 @@ EMAIL="matthewscott@math.ubc.ca"  # Email to send notification to
 ACCOUNT="def-oyilmaz"
 JOB_NAME="Mai_2025"
 TIME="03:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
-MEMORY="16G" 
+MEMORY="4G" 
 CPU_NUM="1"
 GPU_NUM="0"
-ROWS_PER_WORKER=10 # 40 for sparse, 20 for gen MNIST.
+ROWS_PER_WORKER=20 # 40 for sparse, 20 for gen MNIST.
 
 # ARGUMENTS
 # The first argument is the path of the python sweep file to run
 # The second argument is the experiment file, which must specify the "make_df" function and the "experiment function"
 if [ "$#" -ne 3 ]; then
-    echo "Usage: $0 <SWEEP_FILE> <PROJECT_PATH> <OUT_DIR>"
+    echo "Usage: $0 <PATH_TO_parallelize_on_slurm> <PROJECT_PATH> <OUT_DIR>"
     exit 1
 fi
 SWEEP_FILE="$1"
 PROJECT_PATH="$2"
 export PROJECT="$PROJECT_PATH"
 EXP_MODULE_PATH="$PROJECT_PATH"/sparse_recov
-if [ -z "$VENV_ACTIVATE_PATH" ]; then
-    VENV_ACTIVATE_PATH="$PROJECT_PATH/.venv/bin/activate"
+if [ -z "$VENV" ]; then
+    echo "Env var VENV not set, guessing venv in project."
+    VENV="$PROJECT_PATH/.venv/bin/activate"
 fi
-echo $VENV_ACTIVATE_PATH
+echo $VENV
 PROJECT_HEAD=$(git --git-dir="$PROJECT_PATH"/.git rev-parse HEAD)
 BASE_OUT_DIR="$3"
 
@@ -33,7 +34,7 @@ module load StdEnv
 module load python
 module load scipy-stack
 
-source "$VENV_ACTIVATE_PATH"
+source "$VENV"
 
 JOB_OUT_DIR="$BASE_OUT_DIR"/"$JOB_NAME"
 create_unique_dir() {
@@ -80,7 +81,7 @@ module load StdEnv
 module load python
 module load scipy-stack
 
-source "$VENV_ACTIVATE_PATH"
+source "$VENV"
 mkdir -p $OUT_DIR/exp_\$SLURM_ARRAY_TASK_ID
 python "$SWEEP_FILE" --rows-per-worker $ROWS_PER_WORKER -f "$EXP_MODULE_PATH" -o $OUT_DIR --only-exp-id \$SLURM_ARRAY_TASK_ID > $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/stdout_\${SLURM_ARRAY_TASK_ID} 2> $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/err_\$SLURM_ARRAY_TASK_ID 
 HEREDOC
