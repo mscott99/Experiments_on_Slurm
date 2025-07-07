@@ -95,7 +95,7 @@ module load StdEnv
 module load python
 module load scipy-stack
 
-$([ -n "$VENV" ] && source "$VENV")
+$([ -n "$VENV" ] && echo "source $VENV")
 
 mkdir -p $OUT_DIR/exp_\$SLURM_ARRAY_TASK_ID
 python "$SWEEP_FILE" --rows-per-worker $ROWS_PER_WORKER -f "$EXPERIMENT_MODULE" -o $OUT_DIR --only-exp-id \$SLURM_ARRAY_TASK_ID > $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/stdout_\${SLURM_ARRAY_TASK_ID} 2> $OUT_DIR/exp_\${SLURM_ARRAY_TASK_ID}/err_\$SLURM_ARRAY_TASK_ID 
