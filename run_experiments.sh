@@ -9,7 +9,7 @@ TIME="03:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
 MEMORY="2G" 
 CPU_NUM="1"
 GPU_NUM="0"
-ROWS_PER_WORKER=200 # 40 for sparse, 20 for gen MNIST.
+ROWS_PER_WORKER=2 # 40 for sparse, 20 for gen MNIST.
 
 # ARGUMENTS
 # The first argument is the path of the python sweep file to run
@@ -68,7 +68,7 @@ create_unique_dir() {
 }
 OUT_DIR=$(create_unique_dir "$JOB_OUT_DIR")
 mkdir -p "$OUT_DIR"
-END_IND=$(python "$SWEEP_FILE" --get-num-workers -f "$EXPERIMENT_MODULE" --rows-per-worker "$ROWS_PER_WORKER")
+END_IND=$(python "$SWEEP_FILE" --setup -f "$EXPERIMENT_MODULE" --rows-per-worker "$ROWS_PER_WORKER")
 echo "$END_IND" > "$OUT_DIR"/num_workers.log
 
 if ! [[ "$END_IND" =~ ^[0-9]+$ ]]; then

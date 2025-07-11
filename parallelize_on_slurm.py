@@ -108,7 +108,7 @@ def cleanup(original_df: pd.DataFrame, output_dir, commit:str, max_retries=3, re
         output_dir, "combined_results.pickle"))
 
 
-def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_module_path: str, output_dir: str, exp_id: int, project_dir: str, commit:str, seed=SEED):
+def main(do_setup: bool, do_cleanup: bool, rows_per_worker: int, exp_module_path: str, output_dir: str, exp_id: int, project_dir: str, commit:str, seed=SEED):
     module = load_module(exp_module_path)
     make_df: Callable[[], pd.DataFrame] = getattr(module, 'make_df')
     experiment: Callable[[Union[dict, pd.Series]],
@@ -123,16 +123,24 @@ def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_modu
         raise AttributeError("Module does not contain 'experiment' function")
     if not callable(experiment):
         raise TypeError("'experiment' is not callable")
-
-    if (get_num_workers):
+    initial_df_path = os.path.join(output_dir, "initial_df.pickle")
+    if do_setup:
+        # print("--- Running setup: Creating and saving the initial DataFrame ---")
+        os.makedirs(output_dir, exist_ok=True)
+        module = load_module(exp_module_path)
+        # Create and shuffle the DataFrame ONCE
         df = make_df()
         if not isinstance(df, pd.DataFrame):
             raise ValueError("make_df() must return a pandas DataFrame")
+        df = df.sample(frac=1, random_state=seed)
+        df.to_pickle(initial_df_path)
+        # print(f"✅ Setup complete. Initial shuffled DataFrame with {len(df)} rows saved to {initial_df_path}")
         # negative signs for good rounding
         print(-(-len(df)//rows_per_worker))
         return
 
-    df = make_df().sample(frac=1, random_state=seed) #shuffle
+    df = pd.read_pickle(initial_df_path)
+    assert df is pd.DataFrame
     if (do_cleanup):
         cleanup(df, output_dir, commit)
         return
@@ -159,8 +167,8 @@ def main(get_num_workers: bool, do_cleanup: bool, rows_per_worker: int, exp_modu
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Combine the results of a dataframe run.")
-    parser.add_argument("--get-num-workers",
-                        action='store_true', required=False, help="number of rows each worker should process.")
+    parser.add_argument("--setup", action='store_true', required=False,
+                        help="Generate initial dataframe to fill in, and prints number of row per worker.")
     parser.add_argument("--cleanup", action='store_true', required=False,
                         help="Combine the results of a dataframe run.")
     parser.add_argument("-f", "--exp-file", required=False,
@@ -176,5 +184,5 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output-dir", required=False,
                         help="Output directory")
     args = parser.parse_args()
-    main(args.get_num_workers, args.cleanup, args.rows_per_worker, args.exp_file,
+    main(args.setup, args.cleanup, args.rows_per_worker, args.exp_file,
          args.output_dir, args.only_exp_id, args.project_dir, args.commit)
