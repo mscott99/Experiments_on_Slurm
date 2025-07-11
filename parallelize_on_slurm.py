@@ -50,7 +50,6 @@ def concatenate_experiments(original_df, experiment_dfs):
         return all_experiments_df
     all_experiments_df = pd.concat(
         experiment_dfs, ignore_index=False)
-    all_experiments_df['experiment_found'] = True
     original_df['experiment_found'] = original_df.index.isin(
         all_experiments_df.index)
     all_experiments_df = pd.concat(
@@ -78,7 +77,6 @@ def cleanup(original_df: pd.DataFrame, output_dir, commit:str, max_retries=3, re
         experiment_dfs.append(file_obj)
 
     all_experiments_df = concatenate_experiments(original_df, experiment_dfs)
-
     # Fetch other logs and add them to attributes.
     try:
         # Use cwd parameter to change directory for the subprocess
@@ -93,17 +91,7 @@ def cleanup(original_df: pd.DataFrame, output_dir, commit:str, max_retries=3, re
     except Exception as e:
         all_experiments_df.attrs["Slurm logs and experiment errors/warnings"] = "Could not fetch logs."
         sys.stderr.write(f"An error occurred: {e}\n")
-
-    # add the commit attribute.
     all_experiments_df.attrs["commit"] = commit
-
-    # result = subprocess.run(["cat", "./LOGS/*", "./exp_*/err*"], capture_output=True, text=True, cwd = output_dir)
-    # if result.returncode == 0:
-    #     all_experiments_df.attrs["Slurm logs and experiment errors/warnings"] = result.stdout
-    # else:
-    #     all_experiments_df.attrs["Slurm logs and experiment errors/warnings"] = "Could not fetch logs.\n"
-    #     sys.stderr.write("Could not read the logs and experiment errors.")
-
     all_experiments_df.to_pickle(os.path.join(
         output_dir, "combined_results.pickle"))
 
