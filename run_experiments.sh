@@ -68,7 +68,7 @@ create_unique_dir() {
 }
 OUT_DIR=$(create_unique_dir "$JOB_OUT_DIR")
 mkdir -p "$OUT_DIR"
-END_IND=$(python "$SWEEP_FILE" --setup -f "$EXPERIMENT_MODULE" --rows-per-worker "$ROWS_PER_WORKER")
+END_IND=$(python "$SWEEP_FILE" --setup -f "$EXPERIMENT_MODULE" --rows-per-worker "$ROWS_PER_WORKER" -o $OUT_DIR)
 echo "$END_IND" > "$OUT_DIR"/num_workers.log
 
 if ! [[ "$END_IND" =~ ^[0-9]+$ ]]; then
