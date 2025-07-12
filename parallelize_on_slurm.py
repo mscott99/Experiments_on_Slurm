@@ -52,8 +52,9 @@ def concatenate_experiments(original_df, experiment_dfs):
         experiment_dfs, ignore_index=False)
     original_df['experiment_found'] = original_df.index.isin(
         all_experiments_df.index)
-    all_experiments_df = pd.concat(
-        [all_experiments_df, original_df[original_df['experiment_found'] == False]], ignore_index=False).sort_index()
+    if (original_df['experiment_found'] == False).any():
+        all_experiments_df = pd.concat(
+            [all_experiments_df, original_df[original_df['experiment_found'] == False]], ignore_index=False).sort_index()
     all_experiments_df.attrs = original_df.attrs
     return all_experiments_df
 
@@ -128,7 +129,7 @@ def main(do_setup: bool, do_cleanup: bool, rows_per_worker: int, exp_module_path
         return
 
     df = pd.read_pickle(initial_df_path)
-    assert df is pd.DataFrame
+    assert isinstance(df, pd.DataFrame)
     if (do_cleanup):
         cleanup(df, output_dir, commit)
         return
