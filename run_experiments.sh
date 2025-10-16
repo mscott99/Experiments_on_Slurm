@@ -4,11 +4,11 @@
 USER="mscott99"
 EMAIL="matthewscott@math.ubc.ca"  # Email to send notification to
 ACCOUNT="def-oyilmaz"
-JOB_NAME="Mai_2025"
-TIME="03:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
-MEMORY="2G" 
+JOB_NAME="Oct_2025"
+TIME="01:00:00"    # Max export SBATCH_ACCOUNTexpected time for each job
+MEMORY="3G" 
 CPU_NUM="1"
-GPU_NUM="0"
+GPU_NUM="1"
 ROWS_PER_WORKER=2 # 40 for sparse, 20 for gen MNIST.
 
 # ARGUMENTS
