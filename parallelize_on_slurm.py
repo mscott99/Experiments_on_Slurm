@@ -126,12 +126,7 @@ def main(do_setup: bool, do_cleanup: bool, rows_per_worker: int, exp_module_path
         df.to_pickle(initial_df_path)
         # print(f"✅ Setup complete. Initial shuffled DataFrame with {len(df)} rows saved to {initial_df_path}")
         # negative signs for good rounding
-        print(-(-len(df)//rows_per_worker))
-        print(df.attrs['num_cpus'])
-        print(df.attrs['num_gpus'])
-        print(df.attrs['memory'])
-        print(df.attrs['time'])
-        print(df.attrs['rows_per_worker'])
+        print(-(-len(df)//rows_per_worker), df.attrs['num_cpus'], df.attrs['num_gpus'], df.attrs['memory'], df.attrs['time'], df.attrs['rows_per_worker'])
         return
 
     df = pd.read_pickle(initial_df_path)

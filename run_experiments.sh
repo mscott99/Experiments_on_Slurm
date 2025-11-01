@@ -71,14 +71,9 @@ create_unique_dir() {
 OUT_DIR=$(create_unique_dir "$JOB_OUT_DIR")
 mkdir -p "$OUT_DIR"
 
-python "$SWEEP_FILE" --setup -f "$EXPERIMENT_MODULE" --rows-per-worker "$ROWS_PER_WORKER" -o $OUT_DIR | {
-    read -r NUM_WORKERS
-    read -r CPU_NUM
-    read -r GPU_NUM
-    read -r MEMORY
-    read -r TIME
-    read -r ROWS_PER_WORKER
-}| tee "$BASE_OUT_DIR"/../myout.lock || {
+python "$SWEEP_FILE" --setup -f "$EXPERIMENT_MODULE" --rows-per-worker "$ROWS_PER_WORKER" -o "$OUT_DIR" | {
+     read -r NUM_WORKERS CPU_NUM GPU_NUM MEMORY TIME ROWS_PER_WORKER
+} 2>"$BASE_OUT_DIR"/../myerr.lock | tee "$BASE_OUT_DIR"/../myout.lock || {
     rm -f "$BASE_OUT_DIR"/../running.lock
     exit 1
 }
