@@ -17,6 +17,7 @@ ROWS_PER_WORKER=40 # 40 for sparse, 20 for gen MNIST.
 
 if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
     echo "Usage: $0 <EXPERIMENT_MODULE> <OUT_DIR> [<PATH_TO_parallelize_on_slurm>]"
+    rm -f "$BASE_OUT_DIR"/../running.lock
     exit 1
 fi
 
@@ -27,6 +28,7 @@ elif [ "$#" -eq 3 ]; then
     SWEEP_FILE="$3"
 else
     echo "Error: Sweep file not found at default location and no alternative path provided."
+    rm -f "$BASE_OUT_DIR"/../running.lock
     exit 1
 fi
 
@@ -76,7 +78,7 @@ python "$SWEEP_FILE" --setup -f "$EXPERIMENT_MODULE" --rows-per-worker "$ROWS_PE
     read -r MEMORY
     read -r TIME
     read -r ROWS_PER_WORKER
-} || {
+}| tee "$BASE_OUT_DIR"/../myout.lock || {
     rm -f "$BASE_OUT_DIR"/../running.lock
     exit 1
 }
@@ -86,6 +88,7 @@ echo "$NUM_WORKERS" > "$OUT_DIR"/num_workers.log
 
 if ! [[ "$NUM_WORKERS" =~ ^[0-9]+$ ]]; then
     echo "Error: END_IND is not a valid integer. Value received: $NUM_WORKERS"
+    rm -f "$BASE_OUT_DIR"/../running.lock
     exit 1
 fi
 
