@@ -68,11 +68,15 @@ create_unique_dir() {
 }
 OUT_DIR=$(create_unique_dir "$JOB_OUT_DIR")
 mkdir -p "$OUT_DIR"
-END_IND=$(python "$SWEEP_FILE" --setup -f "$EXPERIMENT_MODULE" --rows-per-worker "$ROWS_PER_WORKER" -o $OUT_DIR)
-echo "$END_IND" > "$OUT_DIR"/num_workers.log
 
-if ! [[ "$END_IND" =~ ^[0-9]+$ ]]; then
-    echo "Error: END_IND is not a valid integer. Value received: $END_IND"
+read -r NUM_WORKERS CPU_NUM GPU_NUM MEMORY TIME ROWS_PER_WORKER <<< $(python "$SWEEP_FILE" --setup -f "$EXPERIMENT_MODULE" --rows-per-worker "$ROWS_PER_WORKER" -o $OUT_DIR) || { rm "$BASE_OUT_DIR"/../running.lock 
+exit 1
+}
+
+echo "$NUM_WORKERS" > "$OUT_DIR"/num_workers.log
+
+if ! [[ "$NUM_WORKERS" =~ ^[0-9]+$ ]]; then
+    echo "Error: END_IND is not a valid integer. Value received: $NUM_WORKERS"
     exit 1
 fi
 
@@ -84,7 +88,7 @@ job_id=$(sbatch << HEREDOC
 #SBATCH --mail-user="$EMAIL"
 #SBATCH --mail-type=END
 #SBATCH --time="$TIME"
-#SBATCH --array=1-"$END_IND"
+#SBATCH --array=1-"$NUM_WORKERS"
 #SBATCH --cpus-per-task="$CPU_NUM"
 #SBATCH --ntasks=1
 $( [ "$GPU_NUM" -gt 0 ] && echo "#SBATCH --gpus-per-node=$GPU_NUM" )

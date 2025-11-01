@@ -119,6 +119,7 @@ def main(do_setup: bool, do_cleanup: bool, rows_per_worker: int, exp_module_path
         module = load_module(exp_module_path)
         # Create and shuffle the DataFrame ONCE
         df = make_df()
+        rows_per_worker = df.attrs['rows_per_worker'] if df.attrs['rows_per_worker'] else rows_per_worker
         if not isinstance(df, pd.DataFrame):
             raise ValueError("make_df() must return a pandas DataFrame")
         df = df.sample(frac=1, random_state=seed)
@@ -126,6 +127,11 @@ def main(do_setup: bool, do_cleanup: bool, rows_per_worker: int, exp_module_path
         # print(f"✅ Setup complete. Initial shuffled DataFrame with {len(df)} rows saved to {initial_df_path}")
         # negative signs for good rounding
         print(-(-len(df)//rows_per_worker))
+        print(df.attrs['num_cpus'])
+        print(df.attrs['num_gpus'])
+        print(df.attrs['memory'])
+        print(df.attrs['time'])
+        print(df.attrs['rows_per_worker'])
         return
 
     df = pd.read_pickle(initial_df_path)
