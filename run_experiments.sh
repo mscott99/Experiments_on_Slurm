@@ -80,6 +80,7 @@ python "$SWEEP_FILE" --setup -f "$EXPERIMENT_MODULE" --rows-per-worker "$ROWS_PE
     rm -f "$BASE_OUT_DIR"/../running.lock
     exit 1
 }
+echo "num cpus is $CPU_NUM\n" 1>&2
 
 echo "$NUM_WORKERS" > "$OUT_DIR"/num_workers.log
 
