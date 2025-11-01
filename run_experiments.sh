@@ -75,7 +75,6 @@ read -r NUM_WORKERS CPU_NUM GPU_NUM MEMORY TIME ROWS_PER_WORKER <<< $(python "$S
     rm -f "$BASE_OUT_DIR"/../running.lock
     exit 1
 }
-echo "num cpus is $CPU_NUM\n" 1>&2
 
 echo "$NUM_WORKERS" > "$OUT_DIR"/num_workers.log
 
